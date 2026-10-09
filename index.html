@@ -1,0 +1,1173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14151c">
+<title>ClickKit Studio | Build without the busywork</title>
+<style>
+:root {
+    --bg:#14151c;
+    --panel:#1c1e28;
+    --panel2:#242633;
+    --line:#343645;
+    --text:#f3f2fa;
+    --muted:#a0a2b5;
+    --accent:#c6f36b;
+    --accentText:#1a2410;
+    --pink:#ff9fcf;
+    --radius:15px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+button:disabled{opacity:.4;cursor:not-allowed}
+::selection{background:var(--accent);color:#18210e}
+.topbar{height:68px;position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:0 23px;background:#171820ee;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);gap:15px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-logo{height:36px;width:36px;display:grid;place-items:center;border-radius:12px;background:var(--accent);color:var(--accentText);font-size:21px;font-weight:1000;transform:rotate(-5deg)}
+.brand-name{font-size:15px;font-weight:950;letter-spacing:-.5px}
+.brand-name span{color:var(--accent)}
+.brand-sub{color:var(--muted);font-size:9px;letter-spacing:1.5px;margin-top:3px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-weight:800;transition:transform .15s,border-color .15s,background .15s}
+.btn:hover{transform:translateY(-1px);border-color:#65697b}
+.btn-primary{color:var(--accentText);background:var(--accent);border-color:var(--accent)}
+.btn-primary:hover{background:#d6ff8b;border-color:#d6ff8b}
+.btn-small{padding:6px 9px;font-size:11px}
+.page{width:min(1500px,100%);margin:auto;padding:22px}
+.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:23px}
+.eyebrow{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.7px;color:var(--accent)}
+.intro h1{font-size:clamp(29px,4vw,43px);line-height:1.05;letter-spacing:-2px;margin:10px 0}
+.intro p{margin:0;color:var(--muted);max-width:590px;line-height:1.8}
+.status{border:1px solid var(--line);border-radius:99px;padding:9px 12px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:21px;padding-bottom:10px}
+.tab{white-space:nowrap;background:transparent;border:1px solid transparent;border-radius:10px;padding:10px 14px;color:var(--muted);font-weight:850}
+.tab:hover{background:var(--panel)}
+.tab.active{color:var(--accent);background:#292e22;border-color:#444d32}
+.page-view{display:none}
+.page-view.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.workspace{display:grid;grid-template-columns:265px minmax(0,1fr);gap:15px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;min-width:0}
+.panel-head{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-head h2{margin:0;font-size:13px;font-weight:900}
+.panel-head p{margin:5px 0 0;font-size:11px;line-height:1.6;color:var(--muted)}
+.panel-body{padding:16px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;font-weight:800;font-size:11px}
+.field label small{font-weight:500;color:var(--muted)}
+input[type="text"],input[type="number"],select,textarea{width:100%;background:#14151c;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px 11px;min-width:0}
+textarea{resize:vertical;line-height:1.65;tab-size:2}
+input[type="color"]{width:100%;height:39px;border:1px solid var(--line);border-radius:9px;background:#14151c;padding:3px}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+.range-line{display:flex;align-items:center;gap:12px}
+.range-line input{flex:1;min-width:0}
+.range-value{width:38px;text-align:right;color:var(--accent);font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.divider{height:1px;background:var(--line);margin:18px 0}
+.field-title{font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:1.4px;font-weight:900;margin-bottom:12px}
+.hint{font-size:11px;color:var(--muted);line-height:1.7}
+.content-stack{display:grid;gap:15px;min-width:0}
+.preview-panel{min-width:0}
+.preview-toolbar{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.preview-label{font-size:12px;font-weight:900}
+.preview-label small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:3px}
+.preview-actions{display:flex;gap:7px}
+.preview-frame{width:100%;height:300px;display:block;background:#f7f7fb;border:0}
+.frame-tall{height:370px}
+.code-panel{min-width:0}
+.code-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.code-head strong{font-size:12px}
+.code-head small{color:var(--muted);font-size:10px}
+.code-tabs{display:flex;gap:5px}
+.code-tab{padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);font-size:10px;font-weight:900}
+.code-tab.active{background:var(--panel2);color:var(--text)}
+.code-editor{display:none;width:100%;min-height:215px;border:0;border-radius:0;padding:16px;background:#111219;color:#d6e3dc;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2;resize:vertical}
+.code-editor.active{display:block}
+.code-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 13px;border-top:1px solid var(--line);flex-wrap:wrap}
+.code-footer p{font-size:10px;color:var(--muted);margin:0}
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:15px;min-width:0}
+.gradient-preview{height:235px;border-radius:13px;background:linear-gradient(135deg,#a78bfa,#c6f36b);display:flex;justify-content:center;align-items:center;overflow:hidden;position:relative;isolation:isolate}
+.gradient-preview:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 30%,#ffffff70,transparent 28%);transform:rotate(25deg);pointer-events:none}
+.gradient-card{position:relative;z-index:1;width:70%;padding:21px;border-radius:15px;background:#ffffffd9;color:#222534;box-shadow:0 8px 35px #10102030;backdrop-filter:blur(10px)}
+.gradient-card small{font-size:9px;letter-spacing:1.4px;font-weight:900}
+.gradient-card h3{margin:8px 0;font-size:23px;letter-spacing:-1px}
+.gradient-card p{font-size:11px;margin:0;color:#626478;line-height:1.6}
+.output-code{background:#111219;color:#d6e3dc;padding:15px;border-radius:10px;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;min-height:105px}
+.snippet-search{margin-bottom:15px}
+.snippet-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.snippet-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;transition:transform .2s,border-color .2s}
+.snippet-card:hover{transform:translateY(-3px);border-color:#5d6547}
+.snippet-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#2b3025;color:var(--accent);font-size:19px}
+.snippet-card h3{font-size:13px;margin:0}
+.snippet-card p{color:var(--muted);font-size:11px;line-height:1.6;margin:0;flex:1}
+.snippet-card .btn{font-size:11px}
+.snippet-editor{margin-top:17px}
+.empty{color:var(--muted);padding:25px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+.toast-area{position:fixed;bottom:18px;right:18px;z-index:100;display:grid;gap:8px;pointer-events:none}
+.toast{background:var(--accent);color:#19210e;border-radius:11px;padding:12px 16px;font-weight:900;font-size:12px;box-shadow:0 10px 25px #0003;animation:fadeIn .18s ease;max-width:min(350px,calc(100vw - 36px))}
+footer{padding:23px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:10px;margin-top:35px}
+@media(max-width:1050px){.workspace{grid-template-columns:230px minmax(0,1fr)}.snippet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.topbar{height:62px;padding:0 12px}.brand-name{font-size:13px}.brand-sub{font-size:8px}.header-actions .optional{display:none}.page{padding:13px}.workspace{grid-template-columns:1fr}.two-cols{grid-template-columns:1fr}.preview-frame{height:280px}.frame-tall{height:340px}.snippet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.intro h1{font-size:32px}}
+@media(max-width:430px){.page{padding:9px}.snippet-grid{grid-template-columns:1fr}.intro h1{font-size:29px}.panel-body{padding:12px}.preview-actions .btn{padding:7px 8px;font-size:10px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-logo">⌘</div>
+        <div>
+            <div class="brand-name">CLICK<span>KIT</span> STUDIO</div>
+            <div class="brand-sub">LESS TYPING · MORE BUILDING</div>
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="btn optional" id="resetBtn">↻ Reset editor</button>
+        <button class="btn btn-primary" id="downloadBtn">Download HTML ↗</button>
+    </div>
+</header>
+
+<main class="page">
+    <section class="intro">
+        <div>
+            <div class="eyebrow">A shortcut for your next project</div>
+            <h1>Stop rewriting. <span style="color:var(--accent)">Start building.</span></h1>
+            <p>Generate website components visually, experiment with CSS, and grab reusable code snippets. Make it once, copy it anywhere.</p>
+        </div>
+        <div class="status"><span class="status-dot"></span> Runs in your browser</div>
+    </section>
+
+    <nav class="tabs" aria-label="Workspace">
+        <button class="tab active" data-page="components">✦ Component builder</button>
+        <button class="tab" data-page="csslab">◈ CSS playground</button>
+        <button class="tab" data-page="snippets">⌘ Snippet library</button>
+    </nav>
+
+    <!-- COMPONENT BUILDER -->
+    <section class="page-view active" id="components">
+        <div class="workspace">
+            <aside class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Build a component</h2>
+                        <p>Change the settings. The code updates automatically.</p>
+                    </div>
+                    <span>🎛️</span>
+                </div>
+                <div class="panel-body">
+                    <div class="field">
+                        <label for="componentType">Component</label>
+                        <select id="componentType">
+                            <option value="button">Button</option>
+                            <option value="card">Content card</option>
+                            <option value="badge">Badge / label</option>
+                            <option value="input">Input field</option>
+                            <option value="alert">Alert message</option>
+                            <option value="navbar">Navigation bar</option>
+                            <option value="hero">Hero section</option>
+                            <option value="pricing">Pricing card</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="componentTitle" id="titleLabel">Heading</label>
+                        <input id="componentTitle" type="text" value="Your next big idea">
+                    </div>
+                    <div class="field">
+                        <label for="componentBody" id="bodyLabel">Description</label>
+                        <textarea id="componentBody" rows="3">A little component that makes your website feel polished.</textarea>
+                    </div>
+                    <div class="field">
+                        <label for="componentAction" id="actionLabel">Button text</label>
+                        <input id="componentAction" type="text" value="Get started">
+                    </div>
+                    <div class="field">
+                        <label for="componentKicker">Small label / brand</label>
+                        <input id="componentKicker" type="text" value="MADE WITH CLICKKIT">
+                    </div>
+
+                    <div class="divider"></div>
+                    <div class="field-title">Colors</div>
+                    <div class="color-grid">
+                        <div class="field">
+                            <label for="primaryColor">Primary</label>
+                            <input id="primaryColor" type="color" value="#6c63ff">
+                        </div>
+                        <div class="field">
+                            <label for="surfaceColor">Surface</label>
+                            <input id="surfaceColor" type="color" value="#ffffff">
+                        </div>
+                        <div class="field">
+                            <label for="textColor">Text</label>
+                            <input id="textColor" type="color" value="#202235">
+                        </div>
+                        <div class="field">
+                            <label for="accentColor">Accent</label>
+                            <input id="accentColor" type="color" value="#c6f36b">
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+                    <div class="field">
+                        <label for="variant">Style</label>
+                        <select id="variant">
+                            <option value="solid">Solid</option>
+                            <option value="soft">Soft</option>
+                            <option value="outline">Outline</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="radius">Corner roundness <small id="radiusText">14px</small></label>
+                        <div class="range-line">
+                            <input id="radius" type="range" min="0" max="32" value="14">
+                            <span class="range-value" id="radiusValue">14px</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="padding">Spacing <small id="paddingText">16px</small></label>
+                        <div class="range-line">
+                            <input id="padding" type="range" min="6" max="36" value="16">
+                            <span class="range-value" id="paddingValue">16px</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="animation">Entrance animation</label>
+                        <select id="animation">
+                            <option value="yes">Yes, animate it</option>
+                            <option value="no">No animation</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="randomizeBtn" style="width:100%">🎲 Randomize design</button>
+                </div>
+            </aside>
+
+            <div class="content-stack">
+                <section class="panel preview-panel">
+                    <div class="preview-toolbar">
+                        <div class="preview-label">Live preview <small>Rendered from your generated code</small></div>
+                        <div class="preview-actions">
+                            <button class="btn btn-small" id="refreshPreview">↻ Refresh</button>
+                            <button class="btn btn-primary btn-small" id="copyBoth">Copy all code</button>
+                        </div>
+                    </div>
+                    <iframe id="componentPreview" class="preview-frame" title="Component preview" sandbox=""></iframe>
+                    <div class="code-footer">
+                        <p>Preview updates as you edit.</p>
+                        <p>HTML + CSS · No dependencies</p>
+                    </div>
+                </section>
+
+                <section class="panel code-panel">
+                    <div class="code-head">
+                        <div><strong>Generated code</strong><br><small>Copy the parts you need into your project.</small></div>
+                        <div class="code-tabs">
+                            <button class="code-tab active" data-code="html">HTML</button>
+                            <button class="code-tab" data-code="css">CSS</button>
+                        </div>
+                    </div>
+                    <textarea id="htmlOutput" class="code-editor active" spellcheck="false" aria-label="Generated HTML"></textarea>
+                    <textarea id="cssOutput" class="code-editor" spellcheck="false" aria-label="Generated CSS"></textarea>
+                    <div class="code-footer">
+                        <p id="codeStatus">Ready to copy.</p>
+                        <div class="preview-actions">
+                            <button class="btn btn-small" id="copyCurrent">Copy visible code</button>
+                            <button class="btn btn-primary btn-small" id="downloadComponent">Download component</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- CSS PLAYGROUND -->
+    <section class="page-view" id="csslab">
+        <div class="two-cols">
+            <div class="content-stack">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div><h2>CSS gradient lab</h2><p>Make a gradient visually, then copy the exact CSS.</p></div>
+                        <span>🌈</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="color-grid">
+                            <div class="field">
+                                <label for="gradientA">Color one</label>
+                                <input id="gradientA" type="color" value="#7c6cff">
+                            </div>
+                            <div class="field">
+                                <label for="gradientB">Color two</label>
+                                <input id="gradientB" type="color" value="#61e6bd">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="gradientAngle">Angle <small id="angleText">135°</small></label>
+                            <div class="range-line">
+                                <input id="gradientAngle" type="range" min="0" max="360" value="135">
+                                <span class="range-value" id="angleValue">135°</span>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="field">
+                            <label for="shadowX">Shadow horizontal <small id="shadowXText">0px</small></label>
+                            <div class="range-line"><input id="shadowX" type="range" min="-30" max="30" value="0"><span class="range-value" id="shadowXValue">0px</span></div>
+                        </div>
+                        <div class="field">
+                            <label for="shadowY">Shadow vertical <small id="shadowYText">12px</small></label>
+                            <div class="range-line"><input id="shadowY" type="range" min="-10" max="40" value="12"><span class="range-value" id="shadowYValue">12px</span></div>
+                        </div>
+                        <div class="field">
+                            <label for="shadowBlur">Blur <small id="shadowBlurText">30px</small></label>
+                            <div class="range-line"><input id="shadowBlur" type="range" min="0" max="70" value="30"><span class="range-value" id="shadowBlurValue">30px</span></div>
+                        </div>
+                        <div class="field">
+                            <label for="shadowSpread">Spread <small id="shadowSpreadText">0px</small></label>
+                            <div class="range-line"><input id="shadowSpread" type="range" min="-10" max="20" value="0"><span class="range-value" id="shadowSpreadValue">0px</span></div>
+                        </div>
+                        <div class="field">
+                            <label for="shadowColor">Shadow color</label>
+                            <input id="shadowColor" type="color" value="#29234b">
+                        </div>
+                        <button class="btn btn-primary" id="randomGradient" style="width:100%">🎲 Randomize gradient</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="content-stack">
+                <section class="panel">
+                    <div class="preview-toolbar">
+                        <div class="preview-label">Your CSS playground <small>Live gradient and shadow</small></div>
+                        <button class="btn btn-small" id="useGradient">Use in component →</button>
+                    </div>
+                    <div class="panel-body">
+                        <div id="gradientPreview" class="gradient-preview">
+                            <div class="gradient-card">
+                                <small>YOUR DESIGN</small>
+                                <h3>Made to glow.</h3>
+                                <p>Change the colors and shadow controls. This little preview updates instantly.</p>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="field-title">Generated CSS</div>
+                        <textarea id="gradientCode" rows="10" spellcheck="false" aria-label="Generated gradient CSS"></textarea>
+                        <div class="preview-actions" style="margin-top:10px">
+                            <button class="btn btn-primary" id="copyGradient">Copy CSS</button>
+                            <button class="btn" id="downloadCss">Download .css</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- SNIPPET LIBRARY -->
+    <section class="page-view" id="snippets">
+        <div class="panel">
+            <div class="panel-head">
+                <div><h2>Reusable snippet library</h2><p>Click a snippet to load it into the editor, then copy or download it. No need to remember every syntax detail.</p></div>
+                <span>⌘</span>
+            </div>
+            <div class="panel-body">
+                <input class="snippet-search" id="snippetSearch" type="search" placeholder="Search snippets..." style="width:100%;padding:11px;background:#14151c;color:var(--text);border:1px solid var(--line);border-radius:10px">
+                <div class="snippet-grid" id="snippetGrid"></div>
+                <section class="snippet-editor">
+                    <div class="code-head" style="padding:0 0 12px;border:0">
+                        <div><strong id="snippetEditorTitle">Snippet editor</strong><br><small>Editable code. Make changes before copying.</small></div>
+                        <button class="btn btn-small" id="clearSnippet">Clear</button>
+                    </div>
+                    <textarea id="snippetOutput" rows="13" spellcheck="false" placeholder="Choose a snippet above, or write your own code here..."></textarea>
+                    <div class="preview-actions" style="margin-top:10px;flex-wrap:wrap">
+                        <button class="btn btn-primary" id="copySnippet">Copy snippet</button>
+                        <button class="btn" id="downloadSnippet">Download file</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <footer>CLICKKIT STUDIO · Make the boring parts faster. Keep the creative parts yours. ✦</footer>
+</main>
+
+<div class="toast-area" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[ch]));
+}
+
+function toast(message) {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = message;
+    $("#toasts").appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(7px)";
+        setTimeout(() => el.remove(), 250);
+    }, 2200);
+}
+
+async function copyText(value) {
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(value);
+        } else {
+            const area = document.createElement("textarea");
+            area.value = value;
+            area.style.position = "fixed";
+            area.style.opacity = "0";
+            document.body.appendChild(area);
+            area.select();
+            const ok = document.execCommand("copy");
+            area.remove();
+            if (!ok) throw new Error("Copy failed");
+        }
+        toast("Copied to clipboard ✓");
+    } catch {
+        toast("Copy blocked by browser. Select the text and copy it manually.");
+    }
+}
+
+function downloadFile(name, contents, type = "text/plain") {
+    const blob = new Blob([contents], {type});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast("Download started: " + name);
+}
+
+function getConfig() {
+    return {
+        type:$("#componentType").value,
+        title:$("#componentTitle").value,
+        body:$("#componentBody").value,
+        action:$("#componentAction").value,
+        kicker:$("#componentKicker").value,
+        primary:$("#primaryColor").value,
+        surface:$("#surfaceColor").value,
+        text:$("#textColor").value,
+        accent:$("#accentColor").value,
+        variant:$("#variant").value,
+        radius:Number($("#radius").value),
+        padding:Number($("#padding").value),
+        animation:$("#animation").value === "yes"
+    };
+}
+
+/* Create component HTML safely. */
+function componentMarkup(c) {
+    const title = escapeHTML(c.title || "Your component");
+    const body = escapeHTML(c.body || "");
+    const action = escapeHTML(c.action || "Learn more");
+    const kicker = escapeHTML(c.kicker || "A LITTLE DETAIL");
+    const enter = c.animation ? " cc-enter" : "";
+
+    switch (c.type) {
+        case "button":
+            return `<button type="button" class="cc-button cc-${c.variant}${enter}">${action}</button>`;
+
+        case "badge":
+            return `<span class="cc-badge cc-${c.variant}${enter}"><span class="cc-badge-dot">●</span>${action}</span>`;
+
+        case "input":
+            return `<label class="cc-field${enter}"><span>${title}</span><input type="text" placeholder="${body.replace(/"/g,"&quot;")}"><small>${kicker}</small></label>`;
+
+        case "alert":
+            return `<div class="cc-alert cc-${c.variant}${enter}" role="status"><span class="cc-alert-icon">✦</span><div><strong>${title}</strong><p>${body}</p></div></div>`;
+
+        case "navbar":
+            return `<nav class="cc-nav${enter}"><a class="cc-brand" href="#">${title}</a><div class="cc-nav-links"><a href="#">Home</a><a href="#">About</a><a href="#">Projects</a></div><button class="cc-button cc-${c.variant}">${action}</button></nav>`;
+
+        case "hero":
+            return `<section class="cc-hero${enter}"><p class="cc-kicker">${kicker}</p><h1>${title}</h1><p class="cc-description">${body}</p><div class="cc-hero-actions"><button type="button" class="cc-button cc-${c.variant}">${action}</button><a href="#" class="cc-text-link">Explore more ↗</a></div></section>`;
+
+        case "pricing":
+            return `<article class="cc-pricing${enter}"><p class="cc-kicker">${kicker}</p><h2>${title}</h2><div class="cc-price">${action}</div><p class="cc-description">${body}</p><ul><li>✓ Responsive design</li><li>✓ Ready-to-use components</li><li>✓ Easy customization</li></ul><button type="button" class="cc-button cc-${c.variant}">Choose plan</button></article>`;
+
+        case "card":
+        default:
+            return `<article class="cc-card${enter}"><p class="cc-kicker">${kicker}</p><h2>${title}</h2><p class="cc-description">${body}</p><a class="cc-text-link" href="#">${action} ↗</a></article>`;
+    }
+}
+
+function componentCSS(c) {
+    let base = `
+:root {
+  --cc-primary: ${c.primary};
+  --cc-surface: ${c.surface};
+  --cc-text: ${c.text};
+  --cc-accent: ${c.accent};
+  --cc-radius: ${c.radius}px;
+  --cc-space: ${c.padding}px;
+}
+.cc-scope, .cc-scope * { box-sizing: border-box; }
+.cc-scope {
+  color: var(--cc-text);
+  font: 15px/1.6 Inter, ui-sans-serif, system-ui, sans-serif;
+  width: 100%;
+  max-width: 100%;
+}
+.cc-scope a { color: inherit; }
+.cc-scope button, .cc-scope input { font: inherit; }
+.cc-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 12px 19px; border-radius: var(--cc-radius);
+  background: var(--cc-primary); color: #fff; border: 1px solid var(--cc-primary);
+  font-weight: 800; text-decoration: none; cursor: pointer;
+  transition: transform .18s, box-shadow .18s, background .18s;
+}
+.cc-button:hover { transform: translateY(-2px); box-shadow: 0 7px 18px #00000015; }
+.cc-button:active { transform: translateY(0); }
+.cc-button.cc-soft { background: color-mix(in srgb, var(--cc-primary) 13%, var(--cc-surface)); color: var(--cc-primary); }
+.cc-button.cc-outline { background: transparent; color: var(--cc-primary); }
+.cc-card, .cc-pricing {
+  width: min(100%, 380px); padding: calc(var(--cc-space) * 1.5);
+  background: var(--cc-surface); border: 1px solid color-mix(in srgb, var(--cc-text) 12%, transparent);
+  border-radius: calc(var(--cc-radius) + 4px);
+  box-shadow: 0 12px 35px #1b18300d;
+}
+.cc-kicker { color: var(--cc-primary); font-size: 10px; letter-spacing: 1.5px; font-weight: 900; text-transform: uppercase; margin: 0 0 10px; }
+.cc-card h2 { font-size: clamp(22px, 4vw, 30px); letter-spacing: -1.1px; line-height: 1.15; margin: 0 0 12px; }
+.cc-description { color: color-mix(in srgb, var(--cc-text) 70%, transparent); line-height: 1.8; font-size: 13px; margin: 0 0 18px; }
+.cc-text-link { color: var(--cc-primary); text-decoration: none; font-weight: 850; font-size: 13px; }
+.cc-text-link:hover { text-decoration: underline; }
+.cc-badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: color-mix(in srgb,var(--cc-primary) 12%,var(--cc-surface)); color: var(--cc-primary); font-size: 12px; font-weight: 850; }
+.cc-badge.cc-solid { background: var(--cc-primary); color: white; }
+.cc-badge.cc-outline { background: transparent; border: 1px solid var(--cc-primary); }
+.cc-badge-dot { font-size: 9px; color: var(--cc-accent); }
+.cc-field { display: grid; gap: 8px; width: min(100%,360px); color: var(--cc-text); font-size: 13px; font-weight: 800; }
+.cc-field input { padding: 12px 13px; background: var(--cc-surface); color: var(--cc-text); border: 1px solid color-mix(in srgb,var(--cc-text) 20%,transparent); border-radius: var(--cc-radius); outline-color: var(--cc-primary); min-width: 0; width: 100%; }
+.cc-field small { font-size: 11px; color: color-mix(in srgb,var(--cc-text) 65%,transparent); font-weight: 500; }
+.cc-alert { display: flex; gap: 12px; align-items: flex-start; width: min(100%,420px); padding: var(--cc-space); border: 1px solid color-mix(in srgb,var(--cc-primary) 28%,transparent); border-radius: var(--cc-radius); background: color-mix(in srgb,var(--cc-primary) 8%,var(--cc-surface)); }
+.cc-alert.cc-solid { background: var(--cc-primary); color: white; }
+.cc-alert.cc-solid p { color: #ffffffcf; }
+.cc-alert.cc-outline { background: transparent; border-width: 2px; }
+.cc-alert-icon { display: grid; place-items: center; min-width: 28px; height: 28px; border-radius: 9px; background: color-mix(in srgb,var(--cc-primary) 15%,var(--cc-surface)); color: var(--cc-primary); }
+.cc-alert strong { display: block; margin: 1px 0 4px; }
+.cc-alert p { margin: 0; color: color-mix(in srgb,var(--cc-text) 72%,transparent); font-size: 13px; line-height: 1.7; }
+.cc-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 14px; background: var(--cc-surface); border: 1px solid color-mix(in srgb,var(--cc-text) 12%,transparent); border-radius: var(--cc-radius); flex-wrap: wrap; }
+.cc-brand { color: var(--cc-text); font-weight: 950; text-decoration: none; letter-spacing: -.5px; }
+.cc-nav-links { display: flex; gap: 15px; flex-wrap: wrap; }
+.cc-nav-links a { font-size: 12px; text-decoration: none; color: color-mix(in srgb,var(--cc-text) 72%,transparent); }
+.cc-nav-links a:hover { color: var(--cc-primary); }
+.cc-nav .cc-button { padding: 9px 12px; font-size: 12px; }
+.cc-hero { width: 100%; max-width: 650px; padding: calc(var(--cc-space) * 1.4); border-radius: calc(var(--cc-radius) + 6px); background: var(--cc-surface); color: var(--cc-text); border: 1px solid color-mix(in srgb,var(--cc-text) 10%,transparent); }
+.cc-hero h1 { font-size: clamp(30px,5.5vw,56px); letter-spacing: -2.5px; line-height: 1.03; margin: 0 0 17px; }
+.cc-hero .cc-description { max-width: 470px; font-size: 14px; }
+.cc-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.cc-price { font-size: 36px; font-weight: 950; letter-spacing: -1.7px; margin: 4px 0 8px; }
+.cc-pricing h2 { margin: 0; font-size: 22px; letter-spacing: -.7px; }
+.cc-pricing ul { list-style: none; padding: 0; display: grid; gap: 9px; margin: 20px 0; font-size: 12px; }
+.cc-pricing li::first-letter { color: var(--cc-primary); }
+.cc-enter { animation: cc-appear .42s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes cc-appear { from { opacity: 0; transform: translateY(9px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media(max-width:480px) { .cc-nav { align-items: flex-start; } .cc-nav-links { order: 3; width: 100%; } }
+`;
+    return base.trim();
+}
+
+let currentHtml = "";
+let currentCss = "";
+
+function generateComponent() {
+    const c = getConfig();
+    const markup = componentMarkup(c);
+    currentHtml = `<div class="cc-scope">\n  ${markup}\n</div>`;
+    currentCss = componentCSS(c);
+
+    $("#htmlOutput").value = currentHtml;
+    $("#cssOutput").value = currentCss;
+
+    const fullDocument = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Generated component</title>
+<style>
+body { margin:0; padding:28px; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f1f2f8; }
+${currentCss}
+</style>
+</head>
+<body>
+${currentHtml}
+</body>
+</html>`;
+
+    $("#componentPreview").srcdoc = fullDocument;
+    $("#codeStatus").textContent = "Updated just now · " + c.type;
+    updateLabels();
+}
+
+function updateLabels() {
+    const type = $("#componentType").value;
+    const labels = {
+        button:["Button text","Helper text","Small label / brand"],
+        card:["Card heading","Card description","Card label"],
+        badge:["Badge text","Helper text","Small label / brand"],
+        input:["Field label","Placeholder text","Helper text"],
+        alert:["Alert heading","Alert message","Small label / brand"],
+        navbar:["Brand name","Helper text","Call-to-action text"],
+        hero:["Main headline","Hero description","Eyebrow / kicker"],
+        pricing:["Plan title","Plan description","Price, e.g. $9 / month"]
+    };
+    const values = labels[type];
+    $("#titleLabel").textContent = values[0];
+    $("#bodyLabel").textContent = values[1];
+    $("#actionLabel").textContent = values[2];
+}
+
+function showTab(name) {
+    $$(".tab").forEach(button => button.classList.toggle("active",button.dataset.page===name));
+    $$(".page-view").forEach(page => page.classList.toggle("active",page.id===name));
+}
+
+$$(".tab").forEach(button => button.addEventListener("click",()=>showTab(button.dataset.page)));
+
+["componentType","componentTitle","componentBody","componentAction","componentKicker",
+ "primaryColor","surfaceColor","textColor","accentColor","variant","radius","padding","animation"]
+.forEach(id => {
+    $("#"+id).addEventListener("input",() => {
+        if(id==="radius"){
+            $("#radiusText").textContent=$("#radius").value+"px";
+            $("#radiusValue").textContent=$("#radius").value+"px";
+        }
+        if(id==="padding"){
+            $("#paddingText").textContent=$("#padding").value+"px";
+            $("#paddingValue").textContent=$("#padding").value+"px";
+        }
+        generateComponent();
+    });
+    $("#"+id).addEventListener("change",generateComponent);
+});
+
+$("#refreshPreview").addEventListener("click",()=>{generateComponent();toast("Preview refreshed.");});
+$("#copyBoth").addEventListener("click",()=>copyText("<!-- HTML -->\n"+currentHtml+"\n\n<!-- CSS -->\n<style>\n"+currentCss+"\n</style>"));
+
+function activeCodeArea() {
+    return $(".code-editor.active");
+}
+
+$$(".code-tab").forEach(button => button.addEventListener("click",()=>{
+    $$(".code-tab").forEach(b=>b.classList.toggle("active",b===button));
+    $$(".code-editor").forEach(area=>area.classList.toggle("active",area.id===button.dataset.code+"Output"));
+}));
+
+$("#copyCurrent").addEventListener("click",()=>copyText(activeCodeArea().value));
+$("#downloadComponent").addEventListener("click",()=>{
+    downloadFile("clickkit-component.html",
+`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClickKit Component</title>
+<style>
+${currentCss}
+body { margin:24px; }
+</style>
+</head>
+<body>
+${currentHtml}
+</body>
+</html>`,
+"text/html");
+});
+$("#downloadBtn").addEventListener("click",()=>$("#downloadComponent").click());
+
+$("#resetBtn").addEventListener("click",()=>{
+    $("#componentType").value="button";
+    $("#componentTitle").value="Your next big idea";
+    $("#componentBody").value="A little component that makes your website feel polished.";
+    $("#componentAction").value="Get started";
+    $("#componentKicker").value="MADE WITH CLICKKIT";
+    $("#primaryColor").value="#6c63ff";
+    $("#surfaceColor").value="#ffffff";
+    $("#textColor").value="#202235";
+    $("#accentColor").value="#c6f36b";
+    $("#variant").value="solid";
+    $("#radius").value=14;
+    $("#padding").value=16;
+    $("#animation").value="yes";
+    $("#radiusText").textContent="14px";
+    $("#radiusValue").textContent="14px";
+    $("#paddingText").textContent="16px";
+    $("#paddingValue").textContent="16px";
+    generateComponent();
+    toast("Editor reset.");
+});
+
+$("#randomizeBtn").addEventListener("click",()=>{
+    const colors=[
+        ["#6c63ff","#ffffff","#202235","#c6f36b"],
+        ["#ed7298","#fff7f9","#492a3d","#ffdca4"],
+        ["#218c83","#f6fffb","#203b3a","#b8f0dd"],
+        ["#2864dc","#f8fbff","#1e2a43","#ffaecb"],
+        ["#d27c38","#fffaf3","#473328","#f3d67b"],
+        ["#8b65bc","#fcf8ff","#3b2f4e","#9fe8d7"]
+    ];
+    const c=colors[Math.floor(Math.random()*colors.length)];
+    $("#primaryColor").value=c[0];
+    $("#surfaceColor").value=c[1];
+    $("#textColor").value=c[2];
+    $("#accentColor").value=c[3];
+    $("#radius").value=Math.floor(Math.random()*25);
+    $("#padding").value=10+Math.floor(Math.random()*20);
+    $("#variant").value=["solid","soft","outline"][Math.floor(Math.random()*3)];
+    $("#radiusText").textContent=$("#radius").value+"px";
+    $("#radiusValue").textContent=$("#radius").value+"px";
+    $("#paddingText").textContent=$("#padding").value+"px";
+    $("#paddingValue").textContent=$("#padding").value+"px";
+    generateComponent();
+    toast("A fresh design, generated! ✦");
+});
+
+/* CSS PLAYGROUND */
+function gradientSettings() {
+    return {
+        a:$("#gradientA").value,
+        b:$("#gradientB").value,
+        angle:Number($("#gradientAngle").value),
+        x:Number($("#shadowX").value),
+        y:Number($("#shadowY").value),
+        blur:Number($("#shadowBlur").value),
+        spread:Number($("#shadowSpread").value),
+        shadow:$("#shadowColor").value
+    };
+}
+
+function updateRangeLabels() {
+    const fields = [
+        ["gradientAngle","angleValue","angleText","°"],
+        ["shadowX","shadowXValue","shadowXText","px"],
+        ["shadowY","shadowYValue","shadowYText","px"],
+        ["shadowBlur","shadowBlurValue","shadowBlurText","px"],
+        ["shadowSpread","shadowSpreadValue","shadowSpreadText","px"]
+    ];
+    fields.forEach(([id,valueId,textId,suffix])=>{
+        const text=$("#"+id).value+suffix;
+        $("#"+valueId).textContent=text;
+        $("#"+textId).textContent=text;
+    });
+}
+
+function generateGradient() {
+    updateRangeLabels();
+    const g=gradientSettings();
+    const shadow=`${g.x}px ${g.y}px ${g.blur}px ${g.spread}px ${g.shadow}55`;
+    const gradient=`linear-gradient(${g.angle}deg, ${g.a}, ${g.b})`;
+
+    $("#gradientPreview").style.background=gradient;
+    $("#gradientPreview").querySelector(".gradient-card").style.boxShadow=shadow;
+
+    $("#gradientCode").value=
+`.your-element {
+  background: ${gradient};
+  box-shadow: ${shadow};
+  border-radius: 16px;
+}`;
+}
+
+["gradientA","gradientB","gradientAngle","shadowX","shadowY","shadowBlur","shadowSpread","shadowColor"]
+.forEach(id=>$("#"+id).addEventListener("input",generateGradient));
+
+$("#copyGradient").addEventListener("click",()=>copyText($("#gradientCode").value));
+$("#downloadCss").addEventListener("click",()=>downloadFile("my-gradient.css",$("#gradientCode").value,"text/css"));
+
+$("#randomGradient").addEventListener("click",()=>{
+    const colors=["#7c6cff","#61e6bd","#ff82ae","#ffd16e","#72aaff","#fe9c70","#d4a4ff","#65d6e7","#c6f36b","#f29bc2"];
+    $("#gradientA").value=colors[Math.floor(Math.random()*colors.length)];
+    $("#gradientB").value=colors[Math.floor(Math.random()*colors.length)];
+    $("#gradientAngle").value=Math.floor(Math.random()*361);
+    $("#shadowX").value=Math.floor(Math.random()*21)-10;
+    $("#shadowY").value=5+Math.floor(Math.random()*21);
+    $("#shadowBlur").value=10+Math.floor(Math.random()*51);
+    generateGradient();
+    toast("New gradient generated 🌈");
+});
+
+$("#useGradient").addEventListener("click",()=>{
+    const g=gradientSettings();
+    $("#primaryColor").value=g.a;
+    $("#surfaceColor").value=g.b;
+    $("#accentColor").value=g.a;
+    showTab("components");
+    generateComponent();
+    toast("Gradient colors sent to the component builder.");
+});
+
+/* REUSABLE SNIPPETS */
+const snippets = [
+{
+ id:"html",icon:"🌐",title:"HTML starter page",category:"HTML",
+ description:"A clean, responsive HTML document to start a new page.",
+ filename:"index.html",
+ code:`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Website</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Hello, world!</h1>
+    <p>My new website starts here.</p>
+  </main>
+  <script src="script.js"><\/script>
+</body>
+</html>`
+},
+{
+ id:"flex",icon:"↔",title:"Center with Flexbox",category:"CSS",
+ description:"Center an item horizontally and vertically.",
+ filename:"center.css",
+ code:`.parent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}`
+},
+{
+ id:"grid",icon:"▦",title:"Responsive CSS Grid",category:"CSS",
+ description:"A grid that automatically fits cards into available space.",
+ filename:"grid.css",
+ code:`.card-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 220px), 1fr)
+  );
+  gap: 16px;
+}`
+},
+{
+ id:"media",icon:"📱",title:"Mobile breakpoint",category:"CSS",
+ description:"Change your layout for smaller screens.",
+ filename:"mobile.css",
+ code:`/* Desktop styles go above this rule. */
+@media (max-width: 700px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    width: 100%;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+}`
+},
+{
+ id:"gradient",icon:"🌈",title:"Gradient background",category:"CSS",
+ description:"A simple two-color gradient.",
+ filename:"gradient.css",
+ code:`.gradient-box {
+  background: linear-gradient(
+    135deg,
+    #7c6cff,
+    #61e6bd
+  );
+  border-radius: 16px;
+}`
+},
+{
+ id:"shadow",icon:"🌘",title:"Soft card shadow",category:"CSS",
+ description:"A reusable shadow for cards and panels.",
+ filename:"shadow.css",
+ code:`.card {
+  background: white;
+  border: 1px solid #e9e9ef;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(30, 28, 60, 0.10);
+}`
+},
+{
+ id:"button",icon:"🔘",title:"Accessible button",category:"HTML + CSS",
+ description:"A reusable button with hover and keyboard focus states.",
+ filename:"button.css",
+ code:`.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: #6258e8;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms, filter 160ms;
+}
+
+.button:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.button:focus-visible {
+  outline: 3px solid #c6f36b;
+  outline-offset: 3px;
+}`
+},
+{
+ id:"variables",icon:"🎨",title:"CSS variables",category:"CSS",
+ description:"Keep a theme consistent by storing its colors once.",
+ filename:"theme.css",
+ code:`:root {
+  --color-primary: #6258e8;
+  --color-text: #252538;
+  --color-surface: #ffffff;
+  --color-muted: #77778b;
+  --radius: 14px;
+  --space: 16px;
+}
+
+.card {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: var(--space);
+}`
+},
+{
+ id:"clamp",icon:"↕",title:"Fluid font size",category:"CSS",
+ description:"Scale text smoothly between phone and desktop sizes.",
+ filename:"typography.css",
+ code:`.headline {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}`
+},
+{
+ id:"listener",icon:"⚡",title:"Button click handler",category:"JavaScript",
+ description:"Respond to a click without inline JavaScript.",
+ filename:"script.js",
+ code:`const button = document.querySelector("#myButton");
+
+button?.addEventListener("click", () => {
+  console.log("Button clicked!");
+});`
+},
+{
+ id:"storage",icon:"💾",title:"Save a setting",category:"JavaScript",
+ description:"Persist a small preference in this browser.",
+ filename:"storage.js",
+ code:`const STORAGE_KEY = "my-setting";
+
+function saveSetting(value) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+  } catch (error) {
+    console.error("Could not save the setting:", error);
+  }
+}
+
+function loadSetting(fallback = null) {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY);
+    return value === null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}`
+},
+{
+ id:"fetch",icon:"🔗",title:"Fetch JSON data",category:"JavaScript",
+ description:"A starter pattern for loading data from an API.",
+ filename:"fetch.js",
+ code:`async function loadData(url) {
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(\`HTTP error: \${response.status}\`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Could not load data:", error);
+    return null;
+  }
+}
+
+// Example:
+// const data = await loadData("/data.json");`
+},
+{
+ id:"form",icon:"📝",title:"Form validation",category:"JavaScript",
+ description:"Use built-in browser validation and read form data.",
+ filename:"form.js",
+ code:`const form = document.querySelector("#myForm");
+
+form?.addEventListener("submit", event => {
+  event.preventDefault();
+
+  if (!form.reportValidity()) return;
+
+  const data = new FormData(form);
+  const values = Object.fromEntries(data.entries());
+
+  console.log(values);
+});`
+},
+{
+ id:"copy",icon:"📋",title:"Copy to clipboard",category:"JavaScript",
+ description:"Copy text using the Clipboard API with a fallback note.",
+ filename:"clipboard.js",
+ code:`async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (error) {
+    console.error("Clipboard permission was denied:", error);
+    return false;
+  }
+}
+
+// Example:
+// const copied = await copyToClipboard("Hello!");`
+},
+{
+ id:"reset",icon:"🧹",title:"Small CSS reset",category:"CSS",
+ description:"Reduce browser default spacing surprises.",
+ filename:"reset.css",
+ code:`*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}`
+},
+{
+ id:"modal",icon:"🪟",title:"Accessible dialog",category:"HTML + JavaScript",
+ description:"Use a native dialog rather than building one from scratch.",
+ filename:"dialog.html",
+ code:`<button id="openDialog">Open dialog</button>
+
+<dialog id="myDialog" aria-labelledby="dialogTitle">
+  <h2 id="dialogTitle">Hello!</h2>
+  <p>This is a native browser dialog.</p>
+  <button id="closeDialog">Close</button>
+</dialog>
+
+<script>
+const dialog = document.querySelector("#myDialog");
+
+document.querySelector("#openDialog").addEventListener("click", () => {
+  dialog.showModal();
+});
+
+document.querySelector("#closeDialog").addEventListener("click", () => {
+  dialog.close();
+});
+<\/script>`
+}
+];
+
+function renderSnippets() {
+    const q=$("#snippetSearch").value.trim().toLowerCase();
+    const found=snippets.filter(s=>(s.title+" "+s.category+" "+s.description+" "+s.id).toLowerCase().includes(q));
+    const grid=$("#snippetGrid");
+    grid.innerHTML="";
+
+    if(!found.length){
+        const empty=document.createElement("div");
+        empty.className="empty";
+        empty.textContent="No snippets found. Try another search.";
+        grid.appendChild(empty);
+        return;
+    }
+
+    found.forEach(s=>{
+        const card=document.createElement("article");
+        card.className="snippet-card";
+        const icon=document.createElement("div");
+        icon.className="snippet-icon";
+        icon.textContent=s.icon;
+        const title=document.createElement("h3");
+        title.textContent=s.title;
+        const category=document.createElement("div");
+        category.className="eyebrow";
+        category.textContent=s.category;
+        const description=document.createElement("p");
+        description.textContent=s.description;
+        const button=document.createElement("button");
+        button.className="btn btn-primary";
+        button.textContent="Load snippet ↓";
+        button.addEventListener("click",()=>{
+            $("#snippetOutput").value=s.code;
+            $("#snippetEditorTitle").textContent=s.title+" · "+s.filename;
+            $("#snippetOutput").focus();
+            toast("Snippet loaded into editor.");
+            if(window.innerWidth<850) $("#snippetOutput").scrollIntoView({behavior:"smooth",block:"center"});
+        });
+        const copy=document.createElement("button");
+        copy.className="btn";
+        copy.textContent="Copy now";
+        copy.addEventListener("click",()=>copyText(s.code));
+        card.append(icon,category,title,description,button,copy);
+        grid.appendChild(card);
+    });
+}
+
+$("#snippetSearch").addEventListener("input",renderSnippets);
+$("#clearSnippet").addEventListener("click",()=>{
+    $("#snippetOutput").value="";
+    $("#snippetEditorTitle").textContent="Snippet editor";
+});
+$("#copySnippet").addEventListener("click",()=>{
+    if(!$("#snippetOutput").value){toast("Choose a snippet or type some code first.");return;}
+    copyText($("#snippetOutput").value);
+});
+$("#downloadSnippet").addEventListener("click",()=>{
+    const code=$("#snippetOutput").value;
+    if(!code){toast("Nothing to download yet.");return;}
+    const title=$("#snippetEditorTitle").textContent;
+    const match=snippets.find(s=>title.startsWith(s.title));
+    const filename=match?match.filename:"my-snippet.txt";
+    const type=filename.endsWith(".html")?"text/html":filename.endsWith(".css")?"text/css":"text/plain";
+    downloadFile(filename,code,type);
+});
+
+/* Initial setup */
+generateComponent();
+generateGradient();
+renderSnippets();
+</script>
+</body>
+</html>
